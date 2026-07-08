@@ -171,6 +171,7 @@ The following ideas are intentionally excluded from the MVP:
 - Marketplace or plugin ecosystem
 - Enterprise administration
 - Multi-project management
+- **Design Intelligence**: UI/UX critique, accessibility review, animation guidance, icon library suggestions. Validated capability deferred to post-MVI. Planned as a domain within the Recommendation Engine. See `07_Product_Features.md` — Category 5 and `development/PRODUCT_BLUEPRINT.md` for architectural home.
 
 These may be explored after validating the MVP.
 

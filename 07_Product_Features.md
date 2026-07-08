@@ -131,6 +131,8 @@ Status:
 
 ## 5. Design Intelligence
 
+> **Architectural Status — Post-v0.1:** This capability is validated by research (Research Log) and planned for delivery as a domain within the Recommendation Engine. It is explicitly out of scope for MVI v0.1. See `development/IMPLEMENTATION_ROADMAP.md` for the MVI scope definition and `development/PRODUCT_BLUEPRINT.md` for the post-v0.1 domain roadmap. No separate subsystem will be created for this capability.
+
 Purpose:
 
 Improve UI/UX quality.
@@ -145,7 +147,7 @@ Planned Features:
 
 Status:
 
-🟡 Planned
+🔵 Post-v0.1 — Deferred
 
 ---
 

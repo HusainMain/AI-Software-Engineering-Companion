@@ -1,6 +1,6 @@
 # Glossary
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Status:** Living Document
 
@@ -11,6 +11,8 @@
 This glossary defines important technical terms, abbreviations, and concepts used throughout the project.
 
 The objective is to ensure consistent terminology across documentation, research, implementation, and future AI recommendations.
+
+> **Single-Source Policy:** Entries in this Glossary are concise summaries for quick reference. For authoritative definitions — including design notes, relationships, ownership, and examples — refer to the document listed in each entry's cross-reference. Do not define any architectural concept here in full if it is already defined in `development/CORE_CONCEPTS.md` or an engine specification. Duplication of full definitions creates conflicting sources.
 
 ---
 
@@ -62,7 +64,9 @@ The rate at which an AI model consumes its available context window or token bud
 
 ## Context
 
-The information provided to an AI model so it can understand a project, task, or conversation.
+The minimum relevant information required to make a good engineering decision for a specific situation. Selected and assembled by Context Intelligence — not to be confused with the AI model context window (see: Context Window).
+
+See `development/CORE_CONCEPTS.md` — Context.
 
 ---
 
@@ -110,6 +114,22 @@ Often referred to as Technical Debt.
 
 ---
 
+## Engineering GPS
+
+The subsystem that tracks project goals, determines current position in the development lifecycle, and generates navigation recommendations toward completion. Solves validated problems P-001, P-003, and P-006. Guidance only — not task management.
+
+See `development/ENGINEERING_GPS.md` and `development/CORE_CONCEPTS.md` — Engineering GPS.
+
+---
+
+## Engineering Memory
+
+The persistent, append-only archive of all engineering decisions made within a project, including rationale, alternatives considered, and historical context. Supersedes the narrower concept of "Project Memory".
+
+See `development/ENGINEERING_MEMORY.md` and `development/CORE_CONCEPTS.md` — Engineering Memory.
+
+---
+
 # F
 
 ## Feature Creep
@@ -124,11 +144,35 @@ A limited usage plan provided by a software service at no cost.
 
 ---
 
+## Focus
+
+The single engineering concern that deserves the developer's attention right now. Derived from project state and developer intent. Owned by Project Intelligence.
+
+See `development/CORE_CONCEPTS.md` — Focus.
+
+---
+
 # I
 
 ## Incremental Development
 
 Building software in small, testable steps instead of attempting large implementations all at once.
+
+---
+
+## Intent
+
+What the developer is actually trying to accomplish in a given moment, regardless of the specific words they use. Derived from observations, signals, and project state. Produced by the Intent Engine.
+
+See `development/CORE_CONCEPTS.md` — Intent.
+
+---
+
+## Interrupt Budget
+
+The maximum number of unsolicited guidance events permitted within a session before the workspace reduces proactivity. Derived from Trust Level. Owned and enforced by the AI Orchestrator.
+
+See `development/CORE_CONCEPTS.md` — Trust Level and `development/WORKSPACE_BEHAVIOR.md`.
 
 ---
 
@@ -170,7 +214,9 @@ A document describing the objectives, requirements, features, constraints, and s
 
 ## Project Memory
 
-Structured knowledge maintained about a project across multiple AI sessions.
+*Superseded.* The concept of "Project Memory" (structured knowledge across AI sessions) is fully encompassed by Engineering Memory, which defines the persistent, append-only archive of all engineering decisions, rationale, and history within a project. Use Engineering Memory in all architectural and implementation contexts.
+
+See `development/ENGINEERING_MEMORY.md`.
 
 ---
 
@@ -182,13 +228,35 @@ A technique where an AI retrieves relevant information from external knowledge s
 
 ---
 
+## Reasoning
+
+The cognitive process by which an intelligence engine evaluates available information and produces a justified conclusion or recommendation — always including evidence, alternatives considered, and confidence level. Performed within each intelligence engine; coordinated but not performed by the AI Orchestrator.
+
+See `development/CORE_CONCEPTS.md` — Reasoning.
+
+---
+
 ## Repository Health
 
 A measure of the overall quality of a software repository, including documentation, structure, maintainability, security, and technical debt.
 
 ---
 
+## Risk
+
+A potential problem that could negatively affect project quality, timeline, or maintainability. Distinct from an Opportunity. See `development/CORE_CONCEPTS.md` — Risk.
+
+---
+
 # S
+
+## Signal
+
+An interpreted observation that may indicate developer intent or a meaningful project change. Produced by the Intent Engine from raw Observations. Represents interpretation, not certainty.
+
+See `development/CORE_CONCEPTS.md` — Signal.
+
+---
 
 ## Scope Creep
 
@@ -209,6 +277,22 @@ The gradual inconsistency that develops when different parts of a project evolve
 ---
 
 # T
+
+## Trust (Developer Confidence)
+
+Confidence earned by the workspace through consistently accurate, transparent, and explainable guidance. A product outcome that grows over time through positive interactions.
+
+See `development/CORE_CONCEPTS.md` — Trust (Developer Confidence).
+
+---
+
+## Trust Level
+
+A developer-controlled parameter that determines how proactively the workspace surfaces unsolicited guidance (Low / Medium / High). Does not affect recommendation quality — only delivery frequency. Owned and enforced by the AI Orchestrator; stored by Workspace Core.
+
+See `development/CORE_CONCEPTS.md` — Trust Level.
+
+---
 
 ## Technical Debt
 
@@ -256,6 +340,6 @@ Definitions should remain concise, technically accurate, and vendor-neutral.
 
 ---
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Last Updated:** July 2026
