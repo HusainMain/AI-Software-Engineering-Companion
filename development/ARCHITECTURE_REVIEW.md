@@ -20,7 +20,7 @@ The architecture is assessed as **Ready for Implementation** under the scope of 
 # 1. Critical Evaluation of Key Architectural Areas
 
 ## 1.1 The Reasoning Engine
-The specification contains a detailed document ([REASONING_ENGINE.md](file:///c:/Users/husai/Documents/Projects/AI-Software-Engineering-Companion/development/REASONING_ENGINE.md)), but the Reasoning Engine is omitted from the 12 primary subsystems of [SYSTEM_ARCHITECTURE.md](file:///c:/Users/husai/Documents/Projects/AI-Software-Engineering-Companion/development/SYSTEM_ARCHITECTURE.md).
+The specification contains a detailed document ([REASONING_ENGINE.md](REASONING_ENGINE.md)), but the Reasoning Engine is omitted from the 12 primary subsystems of [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md).
 
 *   **Architectural Decision**: The Reasoning Engine is **not** a physical, standalone subsystem. It is a **conceptual cognitive model and design framework** implemented internally by specialized intelligence subsystems (Project Intelligence, Intent Engine, Recommendation Engine, Project Health Engine, and Engineering GPS) and coordinated by the AI Orchestrator.
 *   **Reasoning**:
@@ -29,7 +29,7 @@ The specification contains a detailed document ([REASONING_ENGINE.md](file:///c:
     3.  *Orchestration*: The AI Orchestrator is responsible for "coordinating specialized reasoning" across these engines. The Orchestrator uses the stages (Information → Knowledge → Understanding → Judgment) as a template for structuring reasoning workflows.
 
 ## 1.2 Circular Dependencies
-We reviewed the conceptual dependencies in [SYSTEM_ARCHITECTURE.md](file:///c:/Users/husai/Documents/Projects/AI-Software-Engineering-Companion/development/SYSTEM_ARCHITECTURE.md) and classified/resolved them as follows:
+We reviewed the conceptual dependencies in [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) and classified/resolved them as follows:
 
 1.  **Project Intelligence <--> Context Intelligence**:
     *   *Classification*: **Acceptable Feedback Loop**.
