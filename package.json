@@ -13,6 +13,7 @@
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json && vite build",
     "build:app": "npm run build && electron-builder",
     "lint": "eslint .",
+    "test:provider": "tsc -p tsconfig.electron.json && node dist-electron/main/ai/provider-manager.dev-test.js",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json"
   },
