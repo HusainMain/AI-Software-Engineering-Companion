@@ -2,16 +2,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "outDir": "dist-electron",
+    "outDir": "dist-electron/preload",
     "rootDir": "src",
     "types": ["node", "electron"]
   },
-  "include": ["src/main"],
-  "exclude": ["src/preload"]
+  "include": ["src/preload"]
 }

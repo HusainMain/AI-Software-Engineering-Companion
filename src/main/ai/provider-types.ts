@@ -19,9 +19,11 @@ export interface ProviderConfigurationInput {
 }
 
 export interface StructuredProviderResponse {
-  message: string;
+  recommendation: string;
   reasoning?: string;
   confidence?: number;
+  alternatives: string[];
+  tradeOffs: string[];
   followUps?: string[];
 }
 
@@ -59,13 +61,13 @@ export interface ProviderCompletionFailure {
 export type ProviderCompletionResult = ProviderCompletionSuccess | ProviderCompletionFailure;
 
 export interface ProviderManager {
-  complete(prompt: string): Promise<string>;
-  completeStructured(prompt: string): Promise<ProviderCompletionResult>;
+  complete(prompt: string, signal?: AbortSignal): Promise<string>;
+  completeStructured(prompt: string, signal?: AbortSignal): Promise<ProviderCompletionResult>;
 }
 
 export interface ProviderAdapter {
   provider: AIProviderName;
-  complete(prompt: string, configuration: ProviderConfiguration): Promise<string | ProviderError>;
+  complete(prompt: string, configuration: ProviderConfiguration, signal?: AbortSignal): Promise<string | ProviderError>;
 }
 
 export interface ProviderRegistration {

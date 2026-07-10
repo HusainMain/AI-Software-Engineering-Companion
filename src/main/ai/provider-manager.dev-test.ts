@@ -22,8 +22,8 @@ async function runProviderDeveloperTest(): Promise<void> {
     throw new Error(`Provider developer test failed: ${result.error.code} - ${result.error.message}`);
   }
 
-  if (result.response.message.trim().length === 0) {
-    throw new Error('Provider developer test failed: message was empty.');
+  if (result.response.recommendation.trim().length === 0) {
+    throw new Error('Provider developer test failed: recommendation was empty.');
   }
 
   console.log(
@@ -42,9 +42,11 @@ const mockTransport: ProviderHttpTransport = ({
           {
             message: {
               content: JSON.stringify({
-                message: 'Provider contract is valid.',
+                recommendation: 'Provider contract is valid.',
                 reasoning: 'The mock OpenRouter envelope returned structured JSON.',
                 confidence: 1,
+                alternatives: [],
+                tradeOffs: [],
                 followUps: [],
               }),
             },
@@ -63,9 +65,11 @@ const mockTransport: ProviderHttpTransport = ({
             parts: [
               {
                 text: JSON.stringify({
-                  message: 'Provider contract is valid.',
+                  recommendation: 'Provider contract is valid.',
                   reasoning: 'The mock Gemini envelope returned structured JSON.',
                   confidence: 1,
+                  alternatives: [],
+                  tradeOffs: [],
                   followUps: [],
                 }),
               },

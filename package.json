@@ -10,10 +10,13 @@
     "dev:renderer": "vite --host 127.0.0.1",
     "dev:main": "tsc -p tsconfig.electron.json --watch --preserveWatchOutput",
     "dev:electron": "wait-on tcp:5173 dist-electron/main/main.js && electron .",
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json && vite build",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json && tsc -p tsconfig.preload.json && vite build",
     "build:app": "npm run build && electron-builder",
     "lint": "eslint .",
     "test:provider": "tsc -p tsconfig.electron.json && node dist-electron/main/ai/provider-manager.dev-test.js",
+    "test:project-scanner": "tsc -p tsconfig.electron.json && node dist-electron/main/project-scanner/project-scanner.dev-test.js",
+    "test:relevant-files": "tsc -p tsconfig.electron.json && node dist-electron/main/relevant-file-selector/relevant-file-selector.test.js",
+    "test:prompt-builder": "tsc -p tsconfig.electron.json && node dist-electron/main/ai/prompt-builder.test.js",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.electron.json"
   },
@@ -39,8 +42,12 @@
     }
   },
   "dependencies": {
+    "highlight.js": "^11.11.1",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "react-markdown": "^9.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

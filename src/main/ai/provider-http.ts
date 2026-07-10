@@ -21,10 +21,21 @@ export type ProviderHttpTransport = (
 export async function postJson(
   request: ProviderHttpRequest,
   transport: ProviderHttpTransport = fetchJson,
+  signal?: AbortSignal,
 ): Promise<ProviderHttpResponse | ProviderError> {
   for (let attempt = 0; attempt <= request.maxRetries; attempt += 1) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), request.timeoutMs);
+
+    // If external signal is provided, listen for it
+    const abortHandler = () => controller.abort();
+    signal?.addEventListener('abort', abortHandler);
+
+    console.log('[DEBUG] HTTP Layer -> Before fetch()');
+    console.log('[DEBUG] HTTP Layer -> URL:', request.url);
+    console.log('[DEBUG] HTTP Layer -> HTTP method: POST');
+    console.log('[DEBUG] HTTP Layer -> provider:', request.provider);
+    console.log('[DEBUG] HTTP Layer -> timeout:', request.timeoutMs);
 
     try {
       const response = await transport({
@@ -34,6 +45,12 @@ export async function postJson(
         signal: controller.signal,
       });
 
+      console.log('[DEBUG] HTTP Layer -> After fetch()');
+      console.log('[DEBUG] HTTP Layer -> HTTP status:', response.status);
+      console.log('[DEBUG] HTTP Layer -> body is JSON:', typeof response.body === 'object' && response.body !== null);
+      console.log('[DEBUG] HTTP Layer -> body type:', typeof response.body);
+      console.log('[DEBUG] HTTP Layer -> response length:', JSON.stringify(response.body).length);
+
       if (shouldRetryStatus(response.status) && attempt < request.maxRetries) {
         await delay(retryDelayMs(attempt));
         continue;
@@ -41,6 +58,11 @@ export async function postJson(
 
       return response;
     } catch (error) {
+      console.log('[DEBUG] HTTP Layer -> fetch() threw error');
+      console.log('[DEBUG] HTTP Layer -> error name:', error instanceof Error ? error.name : 'unknown');
+      console.log('[DEBUG] HTTP Layer -> error message:', error instanceof Error ? error.message : String(error));
+      console.log('[DEBUG] HTTP Layer -> error stack:', error instanceof Error ? error.stack : 'none');
+
       const providerError = classifyTransportError(error, request.provider);
 
       if (providerError.retryable && attempt < request.maxRetries) {
@@ -51,6 +73,7 @@ export async function postJson(
       return providerError;
     } finally {
       clearTimeout(timeout);
+      signal?.removeEventListener('abort', abortHandler);
     }
   }
 
@@ -106,7 +129,7 @@ export function classifyHttpStatus(status: number, provider: AIProviderName): Pr
   };
 }
 
-async function fetchJson({
+export async function fetchJson({
   url,
   headers,
   body,
@@ -114,6 +137,12 @@ async function fetchJson({
 }: Omit<ProviderHttpRequest, 'timeoutMs' | 'maxRetries' | 'provider'> & {
   signal: AbortSignal;
 }): Promise<ProviderHttpResponse> {
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> Before fetch()');
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> URL:', url);
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> HTTP method: POST');
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> provider:', 'unknown (direct fetch)');
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> timeout: handled by caller');
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -125,6 +154,12 @@ async function fetchJson({
   });
 
   const text = await response.text();
+
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> After fetch()');
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> HTTP status:', response.status);
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> body is JSON:', text.startsWith('{') || text.startsWith('['));
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> body type:', typeof text);
+  console.log('[DEBUG] HTTP Layer (fetchJson) -> response length:', text.length);
 
   try {
     return {
