@@ -1,4 +1,6 @@
 import type { ProjectContext } from '../project-scanner/types.js';
+import type { IntentResult } from '../../intent-engine/types.js';
+import type { GPSRecommendation } from '../../engineering-gps/types.js';
 import type { RelevantFilesResult, SelectedFile } from '../relevant-file-selector/types.js';
 import type { ProjectIntelligenceState } from '../project-intelligence/types.js';
 import type { ProjectHealthReport } from '../project-health/types.js';
@@ -17,6 +19,8 @@ export interface PromptBuilderInput {
   userQuestion: string;
   projectIntelligence?: ProjectIntelligenceState;
   projectHealth?: ProjectHealthReport;
+  intent?: IntentResult;
+  gps?: GPSRecommendation;
 }
 
 export interface PromptBuilder {

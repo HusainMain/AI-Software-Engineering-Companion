@@ -83,7 +83,7 @@ export function createContextIntelligence(
       const importantDocuments = projectContext?.importantFiles ?? []
 
       const relevantFilesResult = await relevantFileSelector.select(userQuestion, projectContext ?? undefined)
-      let relevantFiles = relevantFilesResult.files.slice(0, fullConfig.maxRelevantFiles)
+      const relevantFiles = relevantFilesResult.files.slice(0, fullConfig.maxRelevantFiles)
 
       const allObservations = engineeringMemory.getRecentObservations(fullConfig.maxObservations)
       const recentObservations = allObservations.slice(0, fullConfig.maxObservations)

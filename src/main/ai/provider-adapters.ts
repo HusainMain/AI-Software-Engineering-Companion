@@ -262,7 +262,46 @@ export function createOpenRouterAdapter(transport?: ProviderHttpTransport): Prov
         return statusError;
       }
 
-      const rawResponse = parseOpenRouterText(response.body);
+      const rawResponse = parseOpenAICompatibleText(response.body, 'openrouter');
+      return rawResponse;
+    },
+  };
+}
+
+export function createGroqAdapter(transport?: ProviderHttpTransport): ProviderAdapter {
+  return {
+    provider: 'groq',
+    async complete(prompt, configuration, signal) {
+      const baseUrl = configuration.baseUrl ?? 'https://api.groq.com/openai/v1';
+      const response = await postJson(
+        {
+          url: `${baseUrl}/chat/completions`,
+          provider: 'groq',
+          timeoutMs: configuration.timeoutMs,
+          maxRetries: configuration.maxRetries,
+          headers: {
+            Authorization: `Bearer ${configuration.apiKey}`,
+          },
+          body: {
+            model: configuration.model,
+            messages: [{ role: 'user', content: buildStructuredResponsePrompt(prompt) }],
+            response_format: { type: 'json_object' },
+          },
+        },
+        transport,
+        signal,
+      );
+
+      if ('code' in response) {
+        return response;
+      }
+
+      const statusError = classifyHttpStatus(response.status, 'groq');
+      if (statusError !== undefined) {
+        return statusError;
+      }
+
+      const rawResponse = parseOpenAICompatibleText(response.body, 'groq');
       return rawResponse;
     },
   };
@@ -303,25 +342,25 @@ function parseGeminiText(body: unknown): string | ProviderError {
   return text.trim().length > 0 ? text : malformed('Gemini returned an empty response.', 'gemini');
 }
 
-function parseOpenRouterText(body: unknown): string | ProviderError {
+function parseOpenAICompatibleText(body: unknown, provider: AIProviderName): string | ProviderError {
   if (!isRecord(body) || !Array.isArray(body.choices)) {
-    debugLog('OpenRouter: unexpected response envelope', body);
-    return malformed('OpenRouter returned an unexpected response envelope.', 'openrouter');
+    debugLog(`${provider}: unexpected response envelope`, body);
+    return malformed(`${provider} returned an unexpected response envelope.`, provider);
   }
 
   const choices: unknown[] = body.choices;
   const firstChoice = choices[0];
   if (!isRecord(firstChoice) || !isRecord(firstChoice.message)) {
-    debugLog('OpenRouter: no message content', firstChoice);
-    return malformed('OpenRouter returned no message content.', 'openrouter');
+    debugLog(`${provider}: no message content`, firstChoice);
+    return malformed(`${provider} returned no message content.`, provider);
   }
 
   const content = firstChoice.message.content;
 
-  debugLog('OpenRouter raw response body:', body);
-  debugLog('OpenRouter content type:', typeof content);
-  debugLog('OpenRouter content isArray:', Array.isArray(content));
-  debugLog('OpenRouter content value:', content);
+  debugLog(`${provider} raw response body:`, body);
+  debugLog(`${provider} content type:`, typeof content);
+  debugLog(`${provider} content isArray:`, Array.isArray(content));
+  debugLog(`${provider} content value:`, content);
 
   if (typeof content === 'string') {
     return content;
@@ -337,8 +376,8 @@ function parseOpenRouterText(body: unknown): string | ProviderError {
     }
   }
 
-  debugLog('OpenRouter: non-string message content', content);
-  return malformed('OpenRouter returned non-string message content.', 'openrouter');
+  debugLog(`${provider}: non-string message content`, content);
+  return malformed(`${provider} returned non-string message content.`, provider);
 }
 
 function malformed(message: string, provider?: AIProviderName): ProviderError {

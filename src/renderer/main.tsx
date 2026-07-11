@@ -6,6 +6,7 @@ import rehypeHighlight from 'rehype-highlight';
 import './styles.css';
 import type { ProviderError, StructuredProviderResponse, ProviderCompletionResult, ProviderErrorCode } from '../main/ai/provider-types.js';
 import type { CompanionApi } from '../preload/index.js';
+import type { ConversationReply } from '../main/workspace-core/types.js';
 
 declare global {
   interface Window {
@@ -25,10 +26,7 @@ interface DisplayableStructuredResponse {
 
 type MessageResult = ProviderCompletionResult;
 
-interface ConversationReply {
-  result: MessageResult;
-  decision: { id: string } | null;
-}
+
 
 interface Message {
   id: string;
@@ -642,7 +640,7 @@ function App(): React.JSX.Element {
       setProgressStep(PROGRESS_STEPS.length - 1);
 
       if (reply.result.ok) {
-        const structuredResponse = mapToDisplayableStructuredResponse(reply.result.response!);
+        const structuredResponse = mapToDisplayableStructuredResponse(reply.result.response);
         setMessages((currentMessages) => [
           ...currentMessages.slice(0, -1),
           { id: crypto.randomUUID(), author: 'assistant', structuredResponse },

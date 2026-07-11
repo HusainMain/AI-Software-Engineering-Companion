@@ -1,25 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-interface ConversationReply {
-  result: {
-    ok: boolean;
-    response?: {
-      recommendation: string;
-      reasoning?: string;
-      alternatives?: string[];
-      tradeOffs?: string[];
-      followUps?: string[];
-      confidence?: number;
-    };
-    error?: {
-      code: string;
-      message: string;
-      retryable: boolean;
-      status?: number;
-    };
-  };
-  decision: { id: string } | null;
-}
+import type { ConversationReply } from '../main/workspace-core/types.js';
 
 const companionApi = {
   sendMessage: (message: string, signal?: AbortSignal): Promise<ConversationReply> => {

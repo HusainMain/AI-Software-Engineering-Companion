@@ -82,7 +82,7 @@ const mockTransport: ProviderHttpTransport = ({
 };
 
 function readProviderName(value: string | undefined): ProviderConfigurationInput['provider'] | undefined {
-  if (value === 'gemini' || value === 'openrouter' || value === 'ollama') {
+  if (value === 'gemini' || value === 'openrouter' || value === 'ollama' || value === 'grog') {
     return value;
   }
 

@@ -1,7 +1,7 @@
 # Implementation Status & Tracker
 
 **Last Updated:** 2026-07-11  
-**Current Phase:** Phase 1 — Foundation (Building Engineering Memory)
+**Current Phase:** Phase 2 — Intelligence & Workflows
 
 ---
 
@@ -12,8 +12,8 @@ Legend:  [ ] Not started   [~] In progress   [✓] Complete   [-] Blocked
 
 Phase 1: Foundation
   [✓] 1.1 Event Bus               [✓] 1.4 Context Intelligence
-  [✓] 1.2 Observation Engine       [~] 1.5 Workspace Core
-  [✓] 1.3 Engineering Memory       [ ] 1.6 Refactor Conversation Flow
+  [✓] 1.2 Observation Engine       [✓] 1.5 Workspace Core
+  [✓] 1.3 Engineering Memory       [✓] 1.6 Refactor Conversation Flow
 
 Phase 2: Intelligence & Workflows
   [ ] 2.1 Project Health Engine    [ ] 2.3 Workflow Engine
@@ -37,8 +37,8 @@ Phase 3: Guidance & Orchestration
 | 1.2 | **Observation Engine** | [✓] Complete | `OBSERVATION_ENGINE.md` | 1.1 |
 | 1.3 | **Engineering Memory** | [✓] Complete | `ENGINEERING_MEMORY.md` | 1.1 |
 | 1.4 | **Context Intelligence** | [✓] Complete | `CONTEXT_INTELLIGENCE.md` | 1.2, 1.3 |
-| 1.5 | **Workspace Core** | [~] In progress | `RUNTIME_ARCHITECTURE.md` | 1.4 |
-| 1.6 | **Refactor Conversation Flow** | [ ] Not started | — | 1.2–1.5 |
+| 1.5 | **Workspace Core** | [✓] Complete | `RUNTIME_ARCHITECTURE.md` | 1.4 |
+| 1.6 | **Refactor Conversation Flow** | [✓] Complete | — | 1.2–1.5 |
 
 #### 1.1 Event Bus
 

@@ -231,6 +231,41 @@ The companion aims to support developers across the complete software engineerin
 
 ---
 
+# ⚙️ Setup
+
+### AI Provider Configuration
+
+The app uses a configurable AI provider layer. Copy `.env.example` to `.env` and configure:
+
+```
+AI_PROVIDER=grog
+AI_MODEL=llama-3.3-70b-versatile
+AI_API_KEY=YOUR_GROQ_API_KEY
+AI_BASE_URL=https://api.groq.com/openai/v1
+```
+
+#### Obtaining a Groq API Key
+
+1. Visit [console.groq.com](https://console.groq.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste the key into `.env` as `AI_API_KEY`
+
+Groq offers a generous free tier suitable for repository-aware software engineering tasks.
+
+#### Supported Providers
+
+| Provider   | Default Model             | Status       |
+|------------|---------------------------|--------------|
+| Groq       | llama-3.3-70b-versatile   | ✅ Default   |
+| Gemini     | gemini-2.5-flash          | ✅ Supported |
+| OpenRouter | openai/gpt-4.1-mini       | ✅ Supported |
+| Ollama     | llama3.1                  | 🔜 Planned   |
+
+To switch providers, change `AI_PROVIDER` and `AI_MODEL` in `.env`.
+
+---
+
 # 📂 Repository Structure
 
 ```

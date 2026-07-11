@@ -1,5 +1,6 @@
 import {
   createGeminiAdapter,
+  createGroqAdapter,
   createOllamaAdapter,
   createOpenRouterAdapter,
 } from './provider-adapters.js';
@@ -13,6 +14,14 @@ export interface ProviderRegistry {
 
 export function createProviderRegistry(transport?: ProviderHttpTransport): ProviderRegistry {
   const registrations = new Map<AIProviderName, ProviderRegistration>([
+    [
+      'grog',
+      {
+        provider: 'grog',
+        defaultModel: 'llama-3.3-70b-versatile',
+        createAdapter: () => createGroqAdapter(transport),
+      },
+    ],
     [
       'gemini',
       {
