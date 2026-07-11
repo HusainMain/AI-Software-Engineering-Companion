@@ -1,5 +1,25 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ConversationReply } from '../main/conversation/types.js';
+
+interface ConversationReply {
+  result: {
+    ok: boolean;
+    response?: {
+      recommendation: string;
+      reasoning?: string;
+      alternatives?: string[];
+      tradeOffs?: string[];
+      followUps?: string[];
+      confidence?: number;
+    };
+    error?: {
+      code: string;
+      message: string;
+      retryable: boolean;
+      status?: number;
+    };
+  };
+  decision: { id: string } | null;
+}
 
 const companionApi = {
   sendMessage: (message: string, signal?: AbortSignal): Promise<ConversationReply> => {
@@ -18,6 +38,14 @@ const companionApi = {
 
   cancelMessage: (): void => {
     ipcRenderer.send('conversation:cancel-message');
+  },
+
+  selectProject: (): Promise<string | null> => {
+    return ipcRenderer.invoke('workspace:select-project') as Promise<string | null>;
+  },
+
+  getActiveProject: (): Promise<string | null> => {
+    return ipcRenderer.invoke('workspace:get-active-project') as Promise<string | null>;
   },
 };
 

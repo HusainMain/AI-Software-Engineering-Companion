@@ -10,8 +10,8 @@
     "skipLibCheck": true,
     "outDir": "dist-electron",
     "rootDir": "src",
-    "types": ["node", "electron"]
+    "types": ["node", "electron", "vitest/globals"]
   },
   "include": ["src/main"],
-  "exclude": ["src/preload"]
+  "exclude": ["src/preload", "**/*.test.ts"]
 }

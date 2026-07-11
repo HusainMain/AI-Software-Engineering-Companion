@@ -1,5 +1,7 @@
 import type { ProjectContext } from '../project-scanner/types.js';
 import type { RelevantFilesResult, SelectedFile } from '../relevant-file-selector/types.js';
+import type { ProjectIntelligenceState } from '../project-intelligence/types.js';
+import type { ProjectHealthReport } from '../project-health/types.js';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -13,6 +15,8 @@ export interface PromptBuilderInput {
   projectContext: ProjectContext;
   relevantFiles: RelevantFilesResult;
   userQuestion: string;
+  projectIntelligence?: ProjectIntelligenceState;
+  projectHealth?: ProjectHealthReport;
 }
 
 export interface PromptBuilder {
@@ -321,6 +325,117 @@ function buildDocumentationContext(context: ProjectContext, selectedFiles: Selec
   return lines.join('\n');
 }
 
+function buildProjectIntelligence(state: ProjectIntelligenceState): string {
+  const lines: string[] = [];
+  
+  if (state.activeFocus) {
+    lines.push(`Active Focus: ${state.activeFocus.description}`);
+    lines.push(`Focus Started: ${state.activeFocus.startedAt}`);
+    if (state.activeFocus.relatedGoalId) {
+      lines.push(`Related Goal ID: ${state.activeFocus.relatedGoalId}`);
+    }
+    lines.push('');
+  }
+  
+  const activeGoals = state.goals.filter(g => g.status === 'active')
+  const plannedGoals = state.goals.filter(g => g.status === 'planned')
+  const completedGoals = state.goals.filter(g => g.status === 'completed')
+  
+  if (activeGoals.length > 0) {
+    lines.push('Active Goals:');
+    for (const goal of activeGoals) {
+      lines.push(`  - [${goal.priority.toUpperCase()}] ${goal.title}: ${goal.description}`);
+    }
+    lines.push('')
+  }
+  
+  if (plannedGoals.length > 0) {
+    lines.push('Planned Goals:');
+    for (const goal of plannedGoals) {
+      lines.push(`  - [${goal.priority.toUpperCase()}] ${goal.title}: ${goal.description}`);
+    }
+    lines.push('')
+  }
+  
+  if (completedGoals.length > 0) {
+    lines.push('Completed Goals:');
+    for (const goal of completedGoals.slice(-5)) {
+      lines.push(`  - ${goal.title} (completed ${goal.completedAt?.slice(0, 10) ?? 'recently'})`);
+    }
+    lines.push('')
+  }
+  
+  if (state.goals.length === 0) {
+    lines.push('- No goals defined')
+  }
+  
+  return lines.join('\n')
+}
+
+function buildProjectHealth(report: ProjectHealthReport): string {
+  const { summary, testCoverage, todoDebt, documentationHealth, configHealth } = report
+  const lines: string[] = []
+  
+  lines.push(`Overall Score: ${summary.score}/100 (Grade: ${summary.grade})`)
+  lines.push('')
+  
+  lines.push('Test Coverage:')
+  lines.push(`  Source Files: ${testCoverage.sourceFileCount}`)
+  lines.push(`  Test Files: ${testCoverage.testFileCount}`)
+  lines.push(`  Ratio: ${(testCoverage.ratio * 100).toFixed(1)}%`)
+  if (testCoverage.testFrameworks.length > 0) {
+    lines.push(`  Frameworks: ${testCoverage.testFrameworks.join(', ')}`)
+  }
+  lines.push('')
+  
+  lines.push('Technical Debt (TODO/FIXME/HACK/XXX):')
+  lines.push(`  Total: ${todoDebt.totalCount}`)
+  lines.push(`  TODO: ${todoDebt.todoCount}, FIXME: ${todoDebt.fixmeCount}, HACK: ${todoDebt.hackCount}, XXX: ${todoDebt.xxxCount}`)
+  if (todoDebt.perFile.length > 0) {
+    lines.push('  Top files:')
+    for (const pf of todoDebt.perFile.slice(0, 5)) {
+      lines.push(`    ${pf.file}: ${pf.count}`)
+    }
+  }
+  lines.push('')
+  
+  lines.push('Documentation:')
+  lines.push(`  README: ${documentationHealth.readmeExists ? 'Yes' : 'No'}${documentationHealth.readmeAgeDays !== null ? ` (${documentationHealth.readmeAgeDays} days old)` : ''}`)
+  lines.push(`  Docs dir: ${documentationHealth.docsDirExists ? 'Yes' : 'No'} (${documentationHealth.docsFileCount} files)`)
+  lines.push('')
+  
+  lines.push('Configuration:')
+  lines.push(`  Lint: ${configHealth.hasLintConfig ? 'Yes' : 'No'}`)
+  lines.push(`  TypeCheck: ${configHealth.hasTypeCheck ? 'Yes' : 'No'}`)
+  lines.push(`  Tests: ${configHealth.hasTests ? 'Yes' : 'No'}`)
+  lines.push(`  CI: ${configHealth.hasCiConfig ? 'Yes' : 'No'}`)
+  lines.push(`  .gitignore: ${configHealth.hasGitignore ? 'Yes' : 'No'}`)
+  lines.push(`  License: ${configHealth.hasLicense ? 'Yes' : 'No'}`)
+  lines.push(`  Dockerfile: ${configHealth.hasDockerfile ? 'Yes' : 'No'}`)
+  if (configHealth.missingRecommended.length > 0) {
+    lines.push(`  Missing: ${configHealth.missingRecommended.join(', ')}`)
+  }
+  lines.push('')
+  
+  if (summary.issues.length > 0) {
+    lines.push('Issues:')
+    for (const issue of summary.issues) {
+      lines.push(`  [${issue.severity.toUpperCase()}] ${issue.category}: ${issue.message}`)
+      if (issue.details) lines.push(`    ${issue.details}`)
+    }
+    lines.push('')
+  }
+  
+  if (summary.strengths.length > 0) {
+    lines.push('Strengths:')
+    for (const strength of summary.strengths) {
+      lines.push(`  - ${strength}`)
+    }
+  }
+  
+  return lines.join('\n')
+}
+
 function serializeSections(sections: PromptSection[]): string {
   return sections
     .map(sec => `${sec.title}\n\n${sec.content}`)
@@ -353,7 +468,7 @@ function trimPromptSections(sections: PromptSection[], maxChars: number): Prompt
 }
 
 export function createPromptBuilder(config: PromptBuilderConfig = DEFAULT_PROMPT_BUILDER_CONFIG): PromptBuilder {
-  function build({ projectContext, relevantFiles, userQuestion }: PromptBuilderInput): string {
+  function build({ projectContext, relevantFiles, userQuestion, projectIntelligence, projectHealth }: PromptBuilderInput): string {
     debugLog('PromptBuilder.build -> input:', {
       projectName: projectContext.projectName,
       userQuestionLength: userQuestion.length,
@@ -361,6 +476,8 @@ export function createPromptBuilder(config: PromptBuilderConfig = DEFAULT_PROMPT
       includeSystemInstructions: config.includeSystemInstructions,
       includeOutputRequirements: config.includeOutputRequirements,
       maxPromptChars: config.maxPromptChars,
+      hasProjectIntelligence: !!projectIntelligence,
+      hasProjectHealth: !!projectHealth,
     });
 
     const sections: PromptSection[] = [];
@@ -399,6 +516,24 @@ export function createPromptBuilder(config: PromptBuilderConfig = DEFAULT_PROMPT
       required: false,
       priority: 3,
     });
+
+    if (projectIntelligence) {
+      sections.push({
+        title: 'PROJECT INTELLIGENCE',
+        content: buildProjectIntelligence(projectIntelligence),
+        required: false,
+        priority: 4,
+      });
+    }
+
+    if (projectHealth) {
+      sections.push({
+        title: 'PROJECT HEALTH',
+        content: buildProjectHealth(projectHealth),
+        required: false,
+        priority: 5,
+      });
+    }
     
     sections.push({
       title: 'USER QUESTION',
@@ -429,6 +564,6 @@ export function createPromptBuilder(config: PromptBuilderConfig = DEFAULT_PROMPT
     
     return prompt;
   }
-  
+
   return { build };
 }

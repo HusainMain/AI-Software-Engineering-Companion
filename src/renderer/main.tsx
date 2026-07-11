@@ -4,14 +4,30 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import './styles.css';
-import type { ProviderError, StructuredProviderResponse } from '../main/ai/provider-types.js';
-import type { ConversationReply, DisplayableStructuredResponse } from '../main/conversation/types.js';
+import type { ProviderError, StructuredProviderResponse, ProviderCompletionResult, ProviderErrorCode } from '../main/ai/provider-types.js';
 import type { CompanionApi } from '../preload/index.js';
 
 declare global {
   interface Window {
     companion: CompanionApi;
   }
+}
+
+// Local types (matching workspace-core/types.ts and provider-types.ts)
+interface DisplayableStructuredResponse {
+  recommendation: string;
+  reasoning: string;
+  alternatives: string[];
+  tradeOffs: string[];
+  followUps: string[];
+  confidence?: number;
+}
+
+type MessageResult = ProviderCompletionResult;
+
+interface ConversationReply {
+  result: MessageResult;
+  decision: { id: string } | null;
 }
 
 interface Message {
@@ -527,10 +543,28 @@ function App(): React.JSX.Element {
   const [progressStep, setProgressStep] = useState(0);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [lastUserMessage, setLastUserMessage] = useState('');
+  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const chatAreaRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    window.companion.getActiveProject().then(setActiveProject);
+  }, []);
+
+  const handleSelectProject = useCallback(async () => {
+    setIsSelecting(true);
+    try {
+      const path = await window.companion.selectProject();
+      if (path) {
+        setActiveProject(path);
+      }
+    } finally {
+      setIsSelecting(false);
+    }
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (!chatAreaRef.current) return;
@@ -608,12 +642,16 @@ function App(): React.JSX.Element {
       setProgressStep(PROGRESS_STEPS.length - 1);
 
       if (reply.result.ok) {
-        const structuredResponse = mapToDisplayableStructuredResponse(reply.result.response);
+        const structuredResponse = mapToDisplayableStructuredResponse(reply.result.response!);
         setMessages((currentMessages) => [
           ...currentMessages.slice(0, -1),
           { id: crypto.randomUUID(), author: 'assistant', structuredResponse },
         ]);
-        setStatus(`Saved decision ${reply.decision.id.slice(0, 8)}`);
+        if (reply.decision) {
+          setStatus(`Saved conversation ${reply.decision.id.slice(0, 8)}`);
+        } else {
+          setStatus('Saved');
+        }
       } else {
         const error = reply.result.error;
         const retryHandler = error.retryable ? handleRetry : undefined;
@@ -659,6 +697,29 @@ function App(): React.JSX.Element {
         <div className="brand">
           <span className="brand-mark">AI</span>
           <span>Engineering Companion</span>
+        </div>
+        <div className="project-selector">
+          {activeProject ? (
+            <div className="project-info">
+              <span className="project-label">Project:</span>
+              <span className="project-name">{activeProject.split(/[/\\]/).pop()}</span>
+              <button
+                className="change-project-btn"
+                onClick={handleSelectProject}
+                disabled={isSelecting}
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <button
+              className="select-project-btn"
+              onClick={handleSelectProject}
+              disabled={isSelecting}
+            >
+              {isSelecting ? 'Selecting...' : 'Open Project'}
+            </button>
+          )}
         </div>
         <nav className="nav-list" aria-label="Workspace">
           <button type="button" className="nav-item active">
