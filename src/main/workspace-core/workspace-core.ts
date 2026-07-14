@@ -4,7 +4,10 @@ import { createEngineeringMemory } from '../engineering-memory/index.js'
 import { migrateDecisionLog } from '../engineering-memory/migrate.js'
 import { createContextIntelligence } from '../context-intelligence/index.js'
 import { createProjectIntelligence } from '../project-intelligence/index.js'
-import { createProjectHealthEngine } from '../project-health/index.js'
+import { createProjectHealthEngine } from '../project-health/index.js';
+import { createKnowledgeEngine } from '../knowledge-engine/index.js';
+import { createRecommendationEngine } from '../recommendation-engine/index.js';
+import { createAIOrchestrator } from '../ai/orchestrator/index.js';
 import { createProjectStateStore, type ProjectStateStore } from '../project-state/project-state-store.js'
 import { createProjectScanner } from '../project-scanner/index.js'
 import { createProviderManager, type ProviderManager } from '../ai/provider-manager.js'
@@ -30,13 +33,16 @@ export async function createWorkspaceCore(config: WorkspaceCoreConfig): Promise<
       console.error('[WorkspaceCore] Migration failed:', error)
     })
 
-  let activeProject: string | null = null
-  let observationEngine: ReturnType<typeof createObservationEngine> | null = null
-  let contextIntelligence: ReturnType<typeof createContextIntelligence> | null = null
-  let projectIntelligence: ReturnType<typeof createProjectIntelligence> | null = null
-  let projectHealthEngine: ReturnType<typeof createProjectHealthEngine> | null = null
-  let providerManager: ProviderManager | null = null
-  let promptBuilder: PromptBuilder | null = null
+   let activeProject: string | null = null
+   let observationEngine: ReturnType<typeof createObservationEngine> | null = null
+   let contextIntelligence: ReturnType<typeof createContextIntelligence> | null = null
+   let projectIntelligence: ReturnType<typeof createProjectIntelligence> | null = null
+   let projectHealthEngine: ReturnType<typeof createProjectHealthEngine> | null = null
+   let knowledgeEngine: ReturnType<typeof createKnowledgeEngine> | null = null
+   let recommendationEngine: ReturnType<typeof createRecommendationEngine> | null = null
+   let orchestrator: ReturnType<typeof createAIOrchestrator> | null = null
+   let providerManager: ProviderManager | null = null
+   let promptBuilder: PromptBuilder | null = null
   let session: WorkspaceSession | null = null
   let ipcHandlersRegistered = false
 
@@ -92,6 +98,9 @@ export async function createWorkspaceCore(config: WorkspaceCoreConfig): Promise<
     projectIntelligence.setFocus('Project analysis and engineering decisions')
 
     projectHealthEngine = createProjectHealthEngine()
+    knowledgeEngine = createKnowledgeEngine()
+    recommendationEngine = createRecommendationEngine(knowledgeEngine)
+    orchestrator = createAIOrchestrator()
 
     providerManager = createProviderManager()
     promptBuilder = createPromptBuilder()

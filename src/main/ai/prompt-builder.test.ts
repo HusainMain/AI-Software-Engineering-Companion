@@ -435,7 +435,14 @@ function runPromptBuilderTests(): void {
   testEmptyRelevantFiles();
   testImportantDocumentsNotSelected();
   
-  console.log('Prompt builder tests passed.');
+    console.log('Prompt builder tests passed.');
+
+import { describe, it } from 'vitest';
+
+describe('PromptBuilder', () => {
+  it('runs internal tests', () => {
+    runPromptBuilderTests();
+  });
+});
 }
 
-runPromptBuilderTests();

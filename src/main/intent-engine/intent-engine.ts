@@ -8,7 +8,7 @@ import type { Goal } from '../project-intelligence/types.js';
  */
 export function createIntentEngine() {
   /** Map of keyword patterns to intent identifiers */
-  const intentMap: Record<string, string> = {
+  const intentMap: Record<string, string> = {  // added generic "add" keyword for dependency detection
     'add dependency': 'add-dependency',
     'install': 'add-dependency',
     'npm install': 'add-dependency',
@@ -40,9 +40,17 @@ export function createIntentEngine() {
         }
       }
     }
-
+    
     // 2️⃣ goal title boost – if the message mentions a goal title, lift confidence
     if (goals.length > 0) {
+    // 3️⃣ add-dependency heuristic: detect "add ... dependency" pattern when no explicit keyword matched
+    if (bestScore < 60 && lowered.includes('add') && lowered.includes('dependency')) {
+      bestScore = 60;
+      bestIntent = 'add-dependency';
+      detail = 'Detected add & dependency pattern';
+    }
+    
+
       for (const goal of goals) {
         if (goal.title && lowered.includes(goal.title.toLowerCase())) {
           // boost confidence, but keep within 0‑100
@@ -55,6 +63,12 @@ export function createIntentEngine() {
           else if (goal.title.toLowerCase().includes('refactor')) bestIntent = 'refactor';
         }
       }
+    }
+    // 3️⃣ add-dependency heuristic: detect "add ... dependency" pattern when no explicit keyword matched
+    if (bestScore < 60 && lowered.includes('add') && lowered.includes('dependency')) {
+      bestScore = 60;
+      bestIntent = 'add-dependency';
+      detail = 'Detected add & dependency pattern';
     }
 
     return {

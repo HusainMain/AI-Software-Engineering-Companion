@@ -1,57 +1,46 @@
-import type { IntentResult } from '../intent-engine/types.js';
+import type { EngineeringGPS, NavigationSuggestion } from './types.js';
 import type { ProjectHealthReport } from '../project-health/types.js';
-import type { GPSRecommendation } from './types.js';
+import type { Destination, Goal } from '../project-intelligence/types.js';
 
-/**
- * Very simple GPS that suggests the next actionable step based on the detected intent
- * and the overall health of the project. The logic is deliberately lightweight –
- * it merely returns a short recommendation string that can be stitched into the LLM
- * prompt.
+/** Simple Engineering GPS implementation.
+ *  - Uses health summary score to detect low‑health situations.
+ *  - Looks at goals to suggest work on an active or planned goal.
+ *  - Falls back to a generic "maintain" suggestion.
  */
-export function createEngineeringGPS() {
-  function getNextStep(intent: IntentResult, health: ProjectHealthReport): GPSRecommendation {
-    // If health is poor, recommend improving health first.
-    if (health.summary && health.summary.score < 70) {
+export function createEngineeringGPS(): EngineeringGPS {
+  function suggest(health: ProjectHealthReport, destination: Destination): NavigationSuggestion {
+    const healthScore = health.summary.score;
+    // 1️⃣ Low health → prioritize health improvement
+    if (healthScore < 70) {
       return {
-        action: 'Improve project health',
-        rationale: `Current overall health score is ${health.summary.score}. Focus on fixing the most critical issues before proceeding with '${intent.intent}'.`,
+        step: 'improve health',
+        reason: `Health score ${healthScore} is below acceptable threshold`,
       };
     }
-
-    // Intent‑specific suggestions
-    switch (intent.intent) {
-      case 'add-dependency':
-        return {
-          action: 'Add dependency',
-          rationale: 'Run `npm install <package>` and commit the updated package-lock.json.',
-        };
-      case 'run-tests':
-        return {
-          action: 'Run test suite',
-          rationale: 'Execute `npm test` (or `vitest run`) to ensure all tests pass.',
-        };
-      case 'refactor':
-        return {
-          action: 'Refactor code',
-          rationale: 'Identify the file(s) to modify and apply the refactor with appropriate tests.',
-        };
-      case 'deploy':
-        return {
-          action: 'Prepare deployment',
-          rationale: 'Run the project‑health assessment and ensure CI builds pass before deployment.',
-        };
-      case 'write-docs':
-        return {
-          action: 'Write documentation',
-          rationale: 'Add or update markdown files in the docs/ folder.',
-        };
-      default:
-        return {
-          action: 'Proceed with user request',
-          rationale: `No specific guidance – follow the user's intent '${intent.intent}'.`,
-        };
+    // 2️⃣ Active goal – continue work
+    const activeGoal = destination.goals.find((g) => g.status === 'active');
+    if (activeGoal) {
+      return {
+        step: `work on goal: ${activeGoal.title}`,
+        reason: 'Goal is currently active',
+      };
     }
+    // 3️⃣ Planned goal – start the highest‑priority planned goal
+    const plannedGoals = destination.goals.filter((g) => g.status === 'planned');
+    if (plannedGoals.length) {
+      // prioritize higher priority (high > medium > low)
+      const priorityOrder = { high: 3, medium: 2, low: 1 } as const;
+      const best = plannedGoals.reduce((best, cur) =>
+        priorityOrder[cur.priority] > priorityOrder[best.priority] ? cur : best,
+      );
+      return {
+        step: `start goal: ${best.title}`,
+        reason: `Highest‑priority planned goal (${best.priority})`,
+      };
+    }
+    // 4️⃣ Default – maintain current state
+    return { step: 'maintain', reason: 'No active or planned goals and health is acceptable' };
   }
 
-  return { getNextStep };
+  return { suggest };
 }

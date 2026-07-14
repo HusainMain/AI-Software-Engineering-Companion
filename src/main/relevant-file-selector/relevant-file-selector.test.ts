@@ -356,4 +356,12 @@ async function runRelevantFileSelectorTests(): Promise<void> {
 void runRelevantFileSelectorTests().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
+
+import { describe, it } from 'vitest';
+
+describe('RelevantFileSelector', () => {
+  it('runs internal tests', async () => {
+    await runRelevantFileSelectorTests();
+  });
+});
 });
